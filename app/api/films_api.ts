@@ -40,5 +40,29 @@ export async function getFilmById(filmId: string) {
 
   const film: Film = await response.json();
 
-  return film;
+  //   const comments = await getComments(filmId);
+
+  const characters : CharacterData[]= await Promise.all(
+    film.people
+      .filter(
+        (url) => url !== "https://ghibliapi.herokuapp.com/people/"
+      )
+      .map((url) => fetch(url).then((res) => res.json()))
+  );
+
+  return { ...film, characters };
+  //   return { ...film, characters, comments };
 }
+
+
+export async function getFilmCharacter(characterId: string): Promise<FilmCharacter> {
+    const response = await fetch(
+      `https://ghibliapi.herokuapp.com/people/${characterId}`
+    );
+  
+    if (!response.ok) {
+      throw response;
+    }
+  
+    return response.json();
+  }
