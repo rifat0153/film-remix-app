@@ -1,3 +1,5 @@
+import { CommentEntry, getComments } from "./comments";
+
 export type FilmCharacter = {
   id: string;
   name: string;
@@ -16,7 +18,7 @@ export type Film = {
   movie_banner: string;
   people: string[];
   characters?: FilmCharacter[];
-  // comments?: CommentEntry[]
+  comments?: CommentEntry[]
 };
 
 export async function getFilms(title?: string | null) {
@@ -40,9 +42,9 @@ export async function getFilmById(filmId: string) {
 
   const film: Film = await response.json();
 
-  //   const comments = await getComments(filmId);
+  const comments = await getComments(filmId);
 
-  const characters : CharacterData[]= await Promise.all(
+  const characters: CharacterData[] = await Promise.all(
     film.people
       .filter(
         (url) => url !== "https://ghibliapi.herokuapp.com/people/"
@@ -50,19 +52,20 @@ export async function getFilmById(filmId: string) {
       .map((url) => fetch(url).then((res) => res.json()))
   );
 
-  return { ...film, characters };
-  //   return { ...film, characters, comments };
+  // return { ...film, characters };
+  return { ...film, characters, comments };
 }
 
+export async function getFilmCharacter(
+  characterId: string
+): Promise<FilmCharacter> {
+  const response = await fetch(
+    `https://ghibliapi.herokuapp.com/people/${characterId}`
+  );
 
-export async function getFilmCharacter(characterId: string): Promise<FilmCharacter> {
-    const response = await fetch(
-      `https://ghibliapi.herokuapp.com/people/${characterId}`
-    );
-  
-    if (!response.ok) {
-      throw response;
-    }
-  
-    return response.json();
+  if (!response.ok) {
+    throw response;
   }
+
+  return response.json();
+}
